@@ -48,7 +48,7 @@ def clear_screen():
 
 def print_vocab(q, score, avg, reverse, a=None):
     print()
-    print('Question:\t\t(score: {}, average: {}, reverse: {})'.format(
+    print('Question:\t\t(score: {}, average: {:.2}, reverse: {})'.format(
         score, avg, 'ON' if reverse else 'OFF'))
     print()
     print('\t{}'.format(q))
@@ -140,9 +140,11 @@ def load_vocabs(csvfile):
     
 
 def save_vocabs(csvfile, vocabs):
+    from os import linesep
     writer = csv.DictWriter(csvfile,
         fieldnames = VOCABLE_FIELDS,
-        delimiter = DELIM)
+        delimiter = DELIM,
+        lineterminator = linesep)
     writer.writerows(vocabs)
 
     
@@ -168,7 +170,7 @@ if __name__ == '__main__':
         practice(v)
         save_vocabs(sys.stdout, v)
     else:
-        with open(args['file'], newline='') as f:
+        with open(args['file']) as f:
             v = load_vocabs(f)
 
         practice(v)
@@ -176,5 +178,5 @@ if __name__ == '__main__':
         if not args['outfile']:
             args['outfile'] = args['file']
 
-        with open(args['outfile'], mode='w', newline='') as f:
+        with open(args['outfile'], mode='w') as f:
             save_vocabs(f, v)
