@@ -7,6 +7,7 @@ from collections import namedtuple, OrderedDict
 
 VOCABLE_FIELDS = ['front', 'back', 'score_fb', 'score_bf']
 DELIM = '\t'
+COMMENT = '#'
 
 SCORE_MIN = 1
 SCORE_MAX = 10
@@ -130,6 +131,8 @@ def load_vocabs(csvfile):
 
     for row in reader:
         f = row['front']
+        if f.startswith(COMMENT):
+            continue
         if f not in fronts:
             vocabs.append(row)
             fronts.add(f)
