@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import sys, tty, termios
+import sys
 import csv
 import sqlite3
-from collections import namedtuple, OrderedDict
+from collections import OrderedDict
 
 VOCABLE_FIELDS = ['front', 'back', 'score_fb', 'score_bf']
 DELIM = '\t'
@@ -33,7 +33,10 @@ SCORES = OrderedDict((
 
 SCORES_WIDTH = max(len(k) for k in SCORES.keys())
 
+
 def getch():
+    import tty
+    import termios
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
@@ -43,9 +46,11 @@ def getch():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     return str(ch)
 
+
 def clear_screen():
     import os
     os.system('clear')
+
 
 def print_vocab(q, score, avg, reverse, a=None):
     print()
@@ -59,19 +64,19 @@ def print_vocab(q, score, avg, reverse, a=None):
         print('Answer:')
         print()
         print('\t{}'.format(a))
-        
+
     print()
+
 
 def print_keys(reverse):
     for k, v in SCORES.items():
         print('{}:\t{} ({:+})'.format(
-            '/'.join(v.keys),
-            k.ljust(SCORES_WIDTH),
-            v.increment))
-    print('{}:\treverse {}'.format('/'.join(CHARS_REVERSE),
-                                    'OFF' if reverse else 'ON')
-        )
+            '/'.join(v.keys), k.ljust(SCORES_WIDTH), v.increment))
+
+    print('{}:\treverse {}'.format(
+        '/'.join(CHARS_REVERSE), 'OFF' if reverse else 'ON'))
     print('q:\tquit')
+
 
 def practice(vocabs, reverse=False):
     ch = 'asdfasdf'
@@ -89,7 +94,7 @@ def practice(vocabs, reverse=False):
 
         clear_screen()
         print_vocab(q, score, avg, reverse)
-        print('any:\tshow answer' )
+        print('any:\tshow answer')
         print('q:\tquit')
         if getch() in CHARS_QUIT:
             break
@@ -111,23 +116,24 @@ def practice(vocabs, reverse=False):
                 score += x.increment
 
         vocab[keys[2]] = str(max(SCORE_MIN, min(SCORE_MAX, score)))
-            
 
 
 def pick_vocab(vlist, reverse=False):
     from random import choice
     attr = 'score_bf' if reverse else 'score_fb'
-    weighted = [ (x, x[attr]) for x in vlist ]
-    population = [ val for val, count in weighted for i in range(int(count)) ]
+    weighted = [(x, x[attr]) for x in vlist]
+    population = [val for val, count in weighted for i in range(int(count))]
     return choice(population)
+
 
 def load_vocabs(csvfile):
     vocabs = []
     fronts = set()
-    reader = csv.DictReader(csvfile,
-        fieldnames = VOCABLE_FIELDS,
-        restval = SCORE_INIT,
-        delimiter= DELIM)
+    reader = csv.DictReader(
+        csvfile,
+        fieldnames=VOCABLE_FIELDS,
+        restval=SCORE_INIT,
+        delimiter=DELIM)
 
     for row in reader:
         f = row['front']
@@ -137,37 +143,34 @@ def load_vocabs(csvfile):
             vocabs.append(row)
             fronts.add(f)
         else:
-            print('ignoring duplicate entry for "{}"'.format(f), file=sys.stderr)
+            print(
+                'ignoring duplicate entry for "{}"'.format(f),
+                file=sys.stderr)
 
     return vocabs
-    
+
 
 def save_vocabs(csvfile, vocabs):
     from os import linesep
-    writer = csv.DictWriter(csvfile,
-        fieldnames = VOCABLE_FIELDS,
-        delimiter = DELIM,
-        lineterminator = linesep)
+    writer = csv.DictWriter(
+        csvfile,
+        fieldnames=VOCABLE_FIELDS,
+        delimiter=DELIM,
+        lineterminator=linesep)
     writer.writerows(vocabs)
 
-    
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='simple vocabulary trainer')
-
-    parser.add_argument('-r', '--reverse',
-                        action = 'store_true',
-                        help = 'ask back-to-front'
-                        )
-
-    parser.add_argument('file', nargs='?',
-                        type=str, default=None)
-    parser.add_argument('outfile', nargs='?',
-                        type=str, default=None)
-
+    parser.add_argument(
+        '-r', '--reverse',
+        action='store_true',
+        help='ask back-to-front')
+    parser.add_argument('file',     nargs='?', type=str, default=None)
+    parser.add_argument('outfile',  nargs='?', type=str, default=None)
     args = vars(parser.parse_args())
-    print(args)
+
     if not args['file']:
         v = load_vocabs(sys.stdin)
         practice(v)
