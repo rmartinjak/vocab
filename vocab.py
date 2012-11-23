@@ -54,7 +54,7 @@ def clear_screen():
 
 def print_vocab(q, score, avg, reverse, a=None):
     print()
-    print('Question:\t\t(score: {}, average: {:.2}, reverse: {})'.format(
+    print('Question:\t\t(score: {}, average: {:.2f}, reverse: {})'.format(
         score, avg, 'ON' if reverse else 'OFF'))
     print()
     print('\t{}'.format(q))
