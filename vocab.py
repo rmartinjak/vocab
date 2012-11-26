@@ -25,13 +25,14 @@ class Score(object):
         self.keys = keys
 
 SCORES = OrderedDict((
-    ('easy',        Score(-1, 'ah')),
-    ('moderate',    Score(+0, 'sj')),
-    ('hard',        Score(+1, 'dk')),
+    ('easy',        Score(-2, 'ah')),
+    ('moderate',    Score(-1, 'sj')),
+    ('hard',        Score(+0, 'dk')),
     ('wrong',       Score(+3, 'fl')),
 ))
 
 SCORES_WIDTH = max(len(k) for k in SCORES.keys())
+CHARS_SCORE = ''.join(v[1].keys for v in SCORES.items())
 
 
 def getch():
@@ -104,10 +105,11 @@ def practice(vocabs, reverse=False):
         print_keys(reverse)
 
         ch = getch()
-        while ch in CHARS_REVERSE:
-            reverse = not reverse
+        while ch not in CHARS_QUIT + CHARS_SCORE:
+            if ch in CHARS_REVERSE:
+                reverse = not reverse
             clear_screen()
-            print_vocab(q, score, avg, a)
+            print_vocab(q, score, avg, reverse, a)
             print_keys(reverse)
             ch = getch()
 
