@@ -130,6 +130,7 @@ def pick_vocab(vlist, reverse=False):
 
 def load_vocabs(csvfile):
     vocabs = []
+    comments = []
     fronts = set()
     reader = csv.DictReader(
         csvfile,
@@ -140,6 +141,7 @@ def load_vocabs(csvfile):
     for row in reader:
         f = row['front']
         if f.startswith(COMMENT):
+            comments.append(f)
             continue
         if f not in fronts:
             vocabs.append(row)
@@ -149,11 +151,14 @@ def load_vocabs(csvfile):
                 'ignoring duplicate entry for "{}"'.format(f),
                 file=sys.stderr)
 
-    return vocabs
+    return vocabs, comments
 
 
-def save_vocabs(csvfile, vocabs):
+def save_vocabs(csvfile, vocabs, comments):
     from os import linesep
+    for c in comments:
+        csvfile.write(c)
+        csvfile.write('\n')
     writer = csv.DictWriter(
         csvfile,
         fieldnames=VOCABLE_FIELDS,
@@ -169,22 +174,19 @@ if __name__ == '__main__':
         '-r', '--reverse',
         action='store_true',
         help='ask back-to-front')
-    parser.add_argument('file',     nargs='?', type=str, default=None)
-    parser.add_argument('outfile',  nargs='?', type=str, default=None)
+    parser.add_argument('infile', type=argparse.FileType('r'))
+    parser.add_argument('outfile', nargs='?', type=str, default=None)
     args = vars(parser.parse_args())
 
-    if not args['file']:
-        v = load_vocabs(sys.stdin)
-        practice(v)
-        save_vocabs(sys.stdout, v)
-    else:
-        with open(args['file']) as f:
-            v = load_vocabs(f)
+    infile = args['infile']
+    outfile = args['outfile']
 
-        practice(v)
+    vocabs, comments = load_vocabs(infile)
+    infile.close()
+    practice(v)
 
-        if not args['outfile']:
-            args['outfile'] = args['file']
+    if not outfile:
+        outfile = infile.name
 
-        with open(args['outfile'], mode='w') as f:
-            save_vocabs(f, v)
+    with open(outfile, 'w') as of:
+        save_vocabs(of, vocabs, comments)
